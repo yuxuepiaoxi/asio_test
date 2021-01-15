@@ -1,0 +1,7 @@
+*.db
+.vs
+Debug/
+Release/*
+!Release/*.dll
+!Release/*.lib
+dddd
