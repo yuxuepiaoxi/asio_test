@@ -14,6 +14,10 @@
 #include "connection_manager.hpp"
 #include "request_handler.hpp"
 
+#include<iostream>
+#include<regex>
+using namespace std;
+
 namespace http {
 	namespace server {
 
@@ -53,8 +57,11 @@ namespace http {
 					因为get请求是一次tcp 而post请求是两次tcp
 					对于post请求，第二次tcp获取得到的result和request并满足发送数据的要求，
 					应该使用post请求的第一条数据
+					有的时候post请求也是一次就可以全部接收完 
+					请求头和请求体中间以\r\n\r\n进行分隔
 					*/
 					string data = buffer_.data();
+
 					buffer_ = { '\0' };//清空buffer
 					if (v_data.size()==0)
 					{
@@ -63,8 +70,33 @@ namespace http {
 						result_first = result;
 						if (request_first.method == "POST")
 						{
-							do_read();
-							return;
+							//有的时候一次post请求就可以接收所有的数据
+							smatch result1;
+							regex r1("\r\n\r\n.*");
+							string s1 = data;
+							string::const_iterator it_start = s1.begin();
+							string::const_iterator it_end = s1.end();
+							string body;
+							while (regex_search(it_start, it_end, result1, r1))
+							{
+								body = result1[0];
+								it_start = result1[0].second;
+
+							}
+							if (!body.empty())
+							{
+								data = body.substr(4, body.length());
+								if (!data.empty())
+								{
+									//一次数据接收就完成了
+								}
+								else {
+									//需要两次数据才接收完
+									do_read();
+									return;
+								}
+							}
+							
 						}						
 					}
 
