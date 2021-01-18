@@ -1,7 +1,7 @@
 *.db
 .vs
+asio_test/Release/
 Debug/
 Release/*
 !Release/*.dll
 !Release/*.lib
-dddd
